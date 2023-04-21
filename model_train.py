@@ -14,8 +14,8 @@ from sklearn.neural_network import MLPClassifier
 
 def training(opt):
     # Generate training set and testing set
-    features = pd.read_csv("TrainingSets/%s_features.csv" % opt.dataset)
-        # "D:\Docs\programs\TrentoLab\OM\Entity type recognition\TrainingSets/%s_features.csv" % opt.dataset)
+    features = pd.read_csv(
+        "D:\Docs\programs\TrentoLab\OM\Entity type recognition\TrainingSets/%s_features.csv" % opt.dataset)
     train_features, test_features = train_test_split(features, test_size=0.3, random_state=42)
 
     # Or use one track as training set and another as testing set
@@ -29,19 +29,13 @@ def training(opt):
     and property-based features: Sim_V, Sim_H, Sim_I.
     """
     X_train = train_features.loc[:, 'Ngram1':'Sim_I']
-    # X_train = train_features.loc[:, 'Ngram':'Sim_V']
-    # X_train = train_features.loc[:, 'Sim_V':'Sim_H']
-    # X_train = train_features.loc[:, 'Ngram1':'Word2vec_sim']
-    # X_train.drop(['Sim_V'], axis=1)
+   
 
     X_train = X_train.fillna(value=0)
     Y_train = train_features['Match']
 
     X_test = test_features.loc[:, 'Ngram1':'Sim_I']
-    # X_test = test_features.loc[:, 'Ngram':'Sim_V']
-    # X_test = test_features.loc[:, 'Sim_V':'Sim_H']
-    # X_test = test_features.loc[:, 'Ngram1':'Word2vec_sim']
-    # X_test.drop(['Sim_V'], axis=1)
+
 
     X_test = X_test.fillna(value=0)
     Y_test = test_features['Match']
@@ -49,17 +43,6 @@ def training(opt):
     # Choosing ML models
     if opt.model == 'DecisionTree':
         model = DecisionTreeClassifier()
-        model.fit(X_train, Y_train)
-
-    elif opt.model == 'RandomForest':
-        model = RandomForestClassifier(n_estimators=500,
-                                       max_features='sqrt', max_depth=3,
-                                       random_state=42)
-        model.fit(X_train, Y_train)
-
-    elif opt.model == 'LogisticRegression':
-        model = LogisticRegression(penalty='l2', C=7.742637,
-                                   class_weight=None)
         model.fit(X_train, Y_train)
 
     elif opt.model == 'XGBoost':
@@ -85,25 +68,8 @@ def training(opt):
         model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
         model.fit(X_train, Y_train)
 
-    elif opt.model == 'SGDClassifier':
-        # model = SGDClassifier(loss='log')
-        model = SGDClassifier()
-        model.partial_fit(X_train, Y_train, classes=np.array([0, 1]))
-
-
 
     y_prob = model.predict(X_test)
-
-    # print(Y_test,y_prob)
-
-    # aa = model.predict_proba(X_test)
-    # aa_proba = []
-    #
-    # for a in aa:
-    #     if a[1]>0.5:
-    #         aa_proba.append(1)
-    #     else:
-    #         aa_proba.append(0)
 
     pred_mappings, true_mappings, correct_mappings = bestMapping(y_prob, test_features)
 
